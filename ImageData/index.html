@@ -4,7 +4,7 @@
 <title></title>
 <style>
 html {overflow:hidden}
-body {position: absolute; margin:0; padding:0;width:100%; height:100%; background: #555}
+body {position: absolute; margin:0; padding:0;width:100%; height:100%; background: #000}
 canvas {display:block}
 p {text-align: center; font-size:12px;color:#454545;}
 </style>
@@ -21,14 +21,18 @@ atImg.onload = function(){
 	var atImgData = new ImgData(document.getElementById('canvas'), atImg);
 	atImgData.switchRotate();
 	document.getElementById('canvas').addEventListener('mousemove', function(e){
-		atImgData.angleSpeed = (e.x - this.width / 2) / 200;
+		atImgData.angleSpeed_y = (e.x - this.width / 2) / 250 * 0.1;
+		atImgData.angleSpeed_x = (e.y - this.height / 2) / 250 * 0.1;
 	}, false);
 	var timer = window.setInterval(function(){
 		if(window.ImgData.debug){
 			window.atImgData = atImgData;
 			clearInterval(timer);
 		}
-		if(atImgData.isRotate) atImgData.rotateY(Math.PI/180 * atImgData.angleSpeed);
+		atImgData.step_z += 0.01 * atImgData.speed_dir;
+		if(Math.abs(atImgData.step_z) > 2) atImgData.speed_dir *= -1; 
+		//console.debug(atImgData.step_z);
+		atImgData.update();
 		atImgData.draw();
 	}, 16);
 	
