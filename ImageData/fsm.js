@@ -40,7 +40,7 @@
 	Fsm.NoState = -1;
 	Fsm.NextState = 1;
 	
-	context.$Fsm = Fsm;
+	if(!context.$Fsm) context.$Fsm = Fsm;
 	
 	var State = function(host, stateId){
 		this.stateId = stateId;

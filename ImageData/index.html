@@ -10,11 +10,30 @@ p {text-align: center; font-size:12px;color:#454545;}
 </style>
 <script src="lib/jcanvas.0.4.js"></script>
 <script src="imagedata.js"></script>
+<script src="stage.js"></script>
+<script src="fsm.js"></script>
+<script src="looper.js"></script>
 </head>
 <body>
 <img id="qq" src="imgs/at.png" style="display:none">
 <canvas id="canvas" width="800" height="600">your brower can't use canvas.</canvas>
 <script>
+if(!this.UL){
+	this.UL = {};
+}
+
+UL.initLogos = function(logoIds){
+	UL.imgs = {};
+	if(!logoIds || !logoIds.length) return;
+	for(var i = 0; i < logoIds.length; i++){
+		UL.imgs[logoIds[i]] = new ImgData(document.getElementById('canvas'), document.getElementById(logoIds[i]));
+	}
+}
+
+UL.init = function(){
+	UL.initLogos(['qq'], function(){console.debug('init success');});
+}
+
 var atImg = document.getElementById('qq');
 atImg.onload = function(){
 	atImg.onload = null;
