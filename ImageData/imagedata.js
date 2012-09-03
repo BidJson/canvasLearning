@@ -64,7 +64,7 @@
 		_pixels[0]._log = true;
 		ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 		this.pixels = _pixels;
-		console.debug(_pixels);
+		//console.debug(_pixels);
 	}
 	
 	ptp.draw = function(){
@@ -125,6 +125,8 @@
 			this.xpos = x*6;
 			this.ypos = y*6;
 			this.zpos = z;
+			this.x = this.getScreenXY().x;
+			this.y = this.getScreenXY().y;
 			this.size = size;
 			this.color = new CVS.$color(color.r, color.g, color.b);
 			this.alpha = alpha;
@@ -133,7 +135,7 @@
 				var _scale = this.getScale();
 				ctx.fillStyle = 'rgba(' + this.color.r + ',' + this.color.g +',' + this.color.b + ',' + /*this.alpha * ImgData.valueBetween(_scale, 1, 0.3) /*/ 256 + ')';
 				ctx.beginPath();
-				ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, true);
+				ctx.arc(this.x, this.y, Math.max(this.size, 0), 0, Math.PI * 2, true);
 				ctx.closePath();
 				ctx.fill();
 			}
@@ -150,6 +152,9 @@
 	
 	ImgData.switchDebug = function(){
 		ImgData.debug = !ImgData.debug;
+	};
+	
+	ImgData.tween = function(particle, from, to, duration, trace){
 	};
 	
 	ImgData.debug = false;
