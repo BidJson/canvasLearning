@@ -1,25 +1,23 @@
 ;(function(context){
-	
-	var Fsm = function(stateList){
+	var Fsm = function(statesList){
 		this.stateArray = {};
-		for(var i in stateList){
-			if(stateList.hasOwnProperty(i)){
-				if(!stateList[i] instanceof State) stateList[i] = new State(this, i);
-				this.stateArray[i] = stateList[i];
+		for(var i in statesList){
+			if(statesList.hasOwnProperty(i)){
+				if(!statesList[i] instanceof State) statesList[i] = new State(this, i);
+				this.stateArray[i] = statesList[i];
 			}
-		}
+		}	
 		this.currentState = Fsm.NoState;
-		this.duration = 0;
+		this.duration = 0;	
 	};
+	
+	Fsm.NoState = -1;
+	Fsm.NextState = 1;
 	
 	var setState = function(host, state){
 		if(!state) state = Fsm.NextState;
 		if(!host.currentState === Fsm.NoState) host.stateArray[host.currentArray].leave();
 		host.currentState = (state === Fsm.NextState) ? (host.currentState + Fsm.NextState) : state;
-	};
-	
-	Fsm.prototype.init = function(startState){
-		this.enter(startState);
 	};
 	
 	Fsm.prototype.leave = function(){
@@ -37,20 +35,15 @@
 		this.stateArray[this.currentState].transition();
 	};
 	
-	Fsm.NoState = -1;
-	Fsm.NextState = 1;
-	
-	if(!context.$Fsm) context.$Fsm = Fsm;
-	
-	var State = function(host, stateId){
+	var State = function(stateId){
 		this.stateId = stateId;
-		this.host = host;
 		this.enter = function(){};
 		this.leave = function(){};
 		this.update = function(){};
 		this.transition = function(){};
 	};
 	
-	context.$State = State;
+	if(!context.Fsm) context.$Fsm = Fsm;
+	if(!context.$State) context.$State = State;
 	
 })(this);

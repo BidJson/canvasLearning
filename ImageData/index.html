@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN">
 <head>
-<title></title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <style>
 html {overflow:hidden}
 body {position: absolute; margin:0; padding:0;width:100%; height:100%; background: #000}
@@ -13,11 +13,12 @@ p {text-align: center; font-size:12px;color:#454545;}
 <script src="stage.js"></script>
 <script src="fsm.js"></script>
 <script src="looper.js"></script>
+<title>UniverseLogo</title>
 </head>
 <body>
-<img id="qq" src="imgs/at.png" style="display:none">
+<img id="qq" src="imgs/at.png" style="display:none" alt="qq"></img>
 <canvas id="canvas" width="800" height="600">your brower can't use canvas.</canvas>
-<script>
+<script type="text/javascript">
 if(!this.UL){
 	this.UL = {};
 }
@@ -31,31 +32,62 @@ UL.initLogos = function(logoIds){
 }
 
 UL.init = function(){
-	UL.initLogos(['qq'], function(){console.debug('init success');});
+	UL.initLogos(['qq']);
+	
+	UL.stage = new $Stage(document.getElementById('canvas'));
+	UL.stage.addEventListener('mousemove', function(x, y){
+		for(var id in UL.imgs){
+			if(UL.imgs.hasOwnProperty(id)){
+				UL.imgs[id].angleSpeed_y = (x - UL.stage.width / 2) / 250 * 0.1;
+				UL.imgs[id].angleSpeed_x = (y - UL.stage.height / 2) / 250 * 0.1;
+			}
+		}
+	});
+	
+	var qq_state = new $State('qq');
+	qq_state.enter = function(){
+		UL.stage.addChild(UL.imgs['qq']);
+	};
+	qq_state.update = function(dt){
+		UL.imgs['qq'].update(dt);
+		UL.imgs['qq'].step_z += 0.01 * UL.imgs['qq'].speed_dir;
+		if(Math.abs(UL.imgs['qq'].step_z) > 2) UL.imgs['qq'].speed_dir *= -1; 
+	};
+	qq_state.transition = function(){
+		return false;
+	};
+	qq_state.leave = function(){
+	};
+	UL.Fsm = new $Fsm({'qq':qq_state});
+	UL.Fsm.enter('qq');
+	Looper.init(UL.Fsm, UL.stage);
+	Looper.start();
 }
 
-var atImg = document.getElementById('qq');
-atImg.onload = function(){
-	atImg.onload = null;
-	var atImgData = new ImgData(document.getElementById('canvas'), atImg);
-	atImgData.switchRotate();
-	document.getElementById('canvas').addEventListener('mousemove', function(e){
-		atImgData.angleSpeed_y = (e.x - this.width / 2) / 250 * 0.1;
-		atImgData.angleSpeed_x = (e.y - this.height / 2) / 250 * 0.1;
-	}, false);
-	var timer = window.setInterval(function(){
-		if(window.ImgData.debug){
-			window.atImgData = atImgData;
-			clearInterval(timer);
-		}
-		atImgData.step_z += 0.01 * atImgData.speed_dir;
-		if(Math.abs(atImgData.step_z) > 2) atImgData.speed_dir *= -1; 
+document.body.onload = function(){UL.init();};
+
+//var atImg = document.getElementById('qq');
+//atImg.onload = function(){
+//	atImg.onload = null;
+//	var atImgData = new ImgData(document.getElementById('canvas'), atImg);
+//	atImgData.switchRotate();
+//	document.getElementById('canvas').addEventListener('mousemove', function(e){
+//		atImgData.angleSpeed_y = (e.x || e.clientX - this.width / 2) / 250 * 0.1;
+//		atImgData.angleSpeed_x = (e.y || e.clientY - this.height / 2) / 250 * 0.1;
+//	}, false);
+//	var timer = window.setInterval(function(){
+//		if(window.ImgData.debug){
+//			window.atImgData = atImgData;
+//			clearInterval(timer);
+//		}
+//		atImgData.step_z += 0.01 * atImgData.speed_dir;
+//		if(Math.abs(atImgData.step_z) > 2) atImgData.speed_dir *= -1; 
 		//console.debug(atImgData.step_z);
-		atImgData.update();
-		atImgData.draw();
-	}, 16);
+//		atImgData.update();
+//		atImgData.draw();
+//	}, 16);
 	
-}
+//}
 </script>
 </body>
 </html>

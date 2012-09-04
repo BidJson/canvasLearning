@@ -1,36 +1,40 @@
-;(function(fsm, stage, context){
-	var Looper = function(config){
-		this.interval = config.interval || 16;
-	};	
+;(function(context){
+	var Looper = {};
+	Looper.interval = 16;
 	
-	Looper.prototype.start = function(){
+	Looper.init = function(fsm, stage){
+		this.fsm = fsm;
+		this.stage = stage;
+	};
+	
+	Looper.start = function(){
 		this.startLoopTime = (+new Date);
 		var timePoint = this.startLoopTime;
 		this.timer = setInterval((function(looper){
-			var dt = (+new Date) - timePoint;
-			timePoint += dt;
 			return function(){
+				var dt = (+new Date) - timePoint;
 				looper.loop(dt);
+				timePoint += dt;
 			};
 		})(this), this.interval);
 	};
 	
-	Looper.prototype.stop = function(){
+	Looper.stop = function(){
 		clearInterval(this.timer);
 	};
 	
-	Looper.prototype.loop = function(dt){
+	Looper.loop = function(dt){
 		this.update(dt);
 		this.draw();
 	};
 	
-	Looper.prototype.update = function(dt){
-		fsm.update(dt);
+	Looper.update = function(dt){
+		this.fsm.update(dt);
 	};
 	
-	Looper.prototype.draw = function(){
-		stage.render();
+	Looper.draw = function(){
+		this.stage.render();
 	};
 	
-	context.$Looper = Looper;
-})(this.$Fsm, this.$Stage, this);
+	context.Looper = Looper;
+})(this);
