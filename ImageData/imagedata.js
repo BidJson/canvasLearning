@@ -143,54 +143,60 @@
 		ImgData.debug = !ImgData.debug;
 	};
 	
-	ImgData.Tween = function(operator, host, to, duration, trace){
-		
-	};
-	
-	ImgData.Tween.prototype = new context.$State();
-	
-	ImgData.Tween = function(host, to, duration, trace, callback){
-		this.host = host;
+	var Tween = function(operator, host, to, duration, trace){
+		this.operator = operator;
 		this.to = to;
 		this.duration = duration;
 		this.trace = trace;
-		this.callback = callback;
 		this.end = true;
+		this.setHost(host);
 	};
 	
-	ImgData.Tween.prototype.start = function(){
-		this.from = this.speed = {};
+	Tween.prototype = new context.$State(0);
+	
+	Tween.prototype.enter = function(){
+		this.from = {};
 		for(var i in this.to){
-			if(this.to.hasOwnProperty(i) && this.host.hasOwnProperty(i)) {
-				this.from[i] = this.host[i];
+			if(this.to.hasOwnProperty(i) && this.operator.hasOwnProperty(i)) {
+				this.from[i] = this.operator[i];
 			}
 		}
 		this.startTime = this.timePoint = (+new Date);
-		this.end = false;
+		this.end = false;		
 	};
 	
-	ImgData.Tween.prototype.update = function(){
+	Tween.prototype.leave = function(){
+	};
+	
+	Tween.prototype.transition = function(){
+		if(this.timePoint - this.startTime >= this.duration){
+			this.end = true;
+			this.host.next();
+		}
+	};
+	
+	Tween.prototype.update = function(dt){
 		if(this.end) return;
 		var dt = (+new Date) - this.timePoint;
 		
 		// TODO 根据轨迹函数应用到各属性变换
-		this.host.xpos += (this.to.xpos - this.from.xpos) * Math.sin(Math.PI*dt/(2*this.duration));
-		this.host.ypos += (this.to.ypos - this.from.ypos) * Math.sin(Math.PI*dt/(2*this.duration));
-		this.host.zpos += (this.to.zpos - this.from.zpos) * Math.sin(Math.PI*dt/(2*this.duration));
+		this.operator.xpos += (this.to.xpos - this.from.xpos) * Math.sin(Math.PI*dt/(2*this.duration));
+		this.operator.ypos += (this.to.ypos - this.from.ypos) * Math.sin(Math.PI*dt/(2*this.duration));
+		this.operator.zpos += (this.to.zpos - this.from.zpos) * Math.sin(Math.PI*dt/(2*this.duration));
 		// 暂时写死，以后实现扩展
 		
 		this.timePoint = (+new Date);
-		if(this.timePoint - this.startTime >= this.duration){
-			this.end = true;
-			this.callback && this.callback();
-		}
 	};
 	
-	ImgData.TweenAnim = function(tweensList, callback){
-		
-	};
+	var TweenAnim = (function(){
+		function TweenAnim(){};
+		TweenAnim.constructor = context.$Fsm;
+		return TweenAnim();
+	})();
 	
 	ImgData.debug = false;
 	
 	if(!context.ImgData) context.ImgData = ImgData;
+	if(!context.Tween) context.Tween = Tween;
+	if(!context.TweenAnim) context.TweenAnim = TweenAnim;
 })(this);

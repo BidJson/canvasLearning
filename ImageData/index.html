@@ -9,14 +9,15 @@ canvas {display:block}
 p {text-align: center; font-size:12px;color:#454545;}
 </style>
 <script src="lib/jcanvas.0.4.js"></script>
-<script src="imagedata.js"></script>
 <script src="stage.js"></script>
 <script src="fsm.js"></script>
 <script src="looper.js"></script>
+<script src="imagedata.js"></script>
 <title>UniverseLogo</title>
 </head>
 <body>
-<img id="qq" src="imgs/at.png" style="display:none" alt="qq"></img>
+<img id="qq" src="imgs/qq40.png" style="display:none" alt="qq"></img>
+<img id="at" src="imgs/at.png" style="display:none" alt="qq"></img>
 <canvas id="canvas" width="800" height="600">your brower can't use canvas.</canvas>
 <script type="text/javascript">
 if(!this.UL){
@@ -32,7 +33,7 @@ UL.initLogos = function(logoIds){
 }
 
 UL.init = function(){
-	UL.initLogos(['qq']);
+	UL.initLogos(['qq', 'at']);
 	
 	UL.stage = new $Stage(document.getElementById('canvas'));
 	UL.stage.addEventListener('mousemove', function(x, y){
@@ -58,8 +59,9 @@ UL.init = function(){
 	};
 	qq_state.leave = function(){
 	};
-	UL.Fsm = new $Fsm({'qq':qq_state});
-	UL.Fsm.enter('qq');
+	
+	UL.Fsm = new $Fsm([qq_state]);
+	UL.Fsm.enter(UL.Fsm.stateMap['qq']);
 	Looper.init(UL.Fsm, UL.stage);
 	Looper.start();
 }
