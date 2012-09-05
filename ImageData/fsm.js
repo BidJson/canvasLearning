@@ -32,10 +32,11 @@
 	Fsm.NoState = -1;
 	Fsm.NextState = 1;
 	
+	// 状态转换：离开当前状态，进入目标状态
 	var setState = function(host, state){
-		if(!host.currentState === Fsm.NoState) host.stateArray[host.currentState].leave();
-		host.currentState = (state === Fsm.NextState) ? (host.currentState + Fsm.NextState) : state;
-		host.stateArray[host.currentState].enter();
+		if(host.currentState !== Fsm.NoState) host.stateArray[host.currentState].leave();
+		host.currentState = state;
+		if(host.currentState !== Fsm.NoState) host.stateArray[host.currentState].enter();
 	};
 	
 	Fsm.prototype.leave = function(){
@@ -43,11 +44,13 @@
 	};
 	
 	Fsm.prototype.enter = function(state){
+		if(state > this.stateArray.length - 1) state = Fsm.NoState;
 		setState(this, state);
 	};
-	
+
+	// 按顺序转换到下一个状态	
 	Fsm.prototype.next = function(){
-		var state = Fsm.NextState;
+		var state = this.currentState + Fsm.NextState;
 		this.enter(state);
 	};
 	

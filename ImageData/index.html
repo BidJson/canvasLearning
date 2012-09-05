@@ -30,7 +30,11 @@ UL.initLogos = function(logoIds){
 	for(var i = 0; i < logoIds.length; i++){
 		UL.imgs[logoIds[i]] = new ImgData(document.getElementById('canvas'), document.getElementById(logoIds[i]));
 	}
-}
+};
+
+UL.initStates = function(){
+	
+};
 
 UL.init = function(){
 	UL.initLogos(['qq', 'at']);
@@ -48,48 +52,46 @@ UL.init = function(){
 	var qq_state = new $State('qq');
 	qq_state.enter = function(){
 		UL.stage.addChild(UL.imgs['qq']);
+		UL.imgs['qq'].createTweenAnim();
+		this.startTime = this.timePoint = (+ new Date);
 	};
 	qq_state.update = function(dt){
 		UL.imgs['qq'].update(dt);
 		UL.imgs['qq'].step_z += 0.01 * UL.imgs['qq'].speed_dir;
-		if(Math.abs(UL.imgs['qq'].step_z) > 2) UL.imgs['qq'].speed_dir *= -1; 
+		if(Math.abs(UL.imgs['qq'].step_z) > 2) UL.imgs['qq'].speed_dir *= -1;
+		this.timePoint += dt;
 	};
 	qq_state.transition = function(){
-		return false;
+		if(this.timePoint - this.startTime >= 5000) this.host.next(); 
 	};
 	qq_state.leave = function(){
+		UL.stage.removeChild(UL.imgs['qq']);
+	};
+
+	var at_state = new $State('at');
+	at_state.enter = function(){
+		UL.stage.addChild(UL.imgs['at']);
+	};
+	at_state.update = function(dt){
+		UL.imgs['at'].update(dt);
+		UL.imgs['at'].step_z += 0.01 * UL.imgs['at'].speed_dir;
+		if(Math.abs(UL.imgs['at'].step_z) > 2) UL.imgs['at'].speed_dir *= -1; 
+	};
+	at_state.transition = function(){
+		return false;
+	};
+	at_state.leave = function(){
 	};
 	
-	UL.Fsm = new $Fsm([qq_state]);
+	UL.Fsm = new $Fsm([qq_state, at_state]);
 	UL.Fsm.enter(UL.Fsm.stateMap['qq']);
 	Looper.init(UL.Fsm, UL.stage);
 	Looper.start();
+	
+	var test_tweenAnim = new TweenAnim([]);
 }
 
 document.body.onload = function(){UL.init();};
-
-//var atImg = document.getElementById('qq');
-//atImg.onload = function(){
-//	atImg.onload = null;
-//	var atImgData = new ImgData(document.getElementById('canvas'), atImg);
-//	atImgData.switchRotate();
-//	document.getElementById('canvas').addEventListener('mousemove', function(e){
-//		atImgData.angleSpeed_y = (e.x || e.clientX - this.width / 2) / 250 * 0.1;
-//		atImgData.angleSpeed_x = (e.y || e.clientY - this.height / 2) / 250 * 0.1;
-//	}, false);
-//	var timer = window.setInterval(function(){
-//		if(window.ImgData.debug){
-//			window.atImgData = atImgData;
-//			clearInterval(timer);
-//		}
-//		atImgData.step_z += 0.01 * atImgData.speed_dir;
-//		if(Math.abs(atImgData.step_z) > 2) atImgData.speed_dir *= -1; 
-		//console.debug(atImgData.step_z);
-//		atImgData.update();
-//		atImgData.draw();
-//	}, 16);
-	
-//}
 </script>
 </body>
 </html>

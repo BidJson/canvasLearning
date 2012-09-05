@@ -8,7 +8,7 @@
 		this.img = img;
 		this.imgWidth = 0;
 		this.imgHeight = 0;
-		this.isRotate = true;
+		this.isRotate = false;
 		this.angleSpeed_x = this.angleSpeed_y = 1;
 		this.step_z = 1;
 		this.speed_dir = 1;
@@ -21,7 +21,7 @@
 			}
 		}
 		this.init();
-	}
+	};
 	
 	var ptp = ImgData.prototype;
 	ptp.init = function(){
@@ -63,34 +63,7 @@
 		}
 		_pixels[0]._log = true;
 		this.pixels = _pixels;
-	}
-	
-	ptp.render = function(){
-		var	_pixels = this.pixels;
-		for(var i = 0; i < _pixels.length; i++) _pixels[i].render();
-	}
-	
-	ptp.rotateY = function(angle){
-		for(var i = 0; i < this.pixels.length; i++){
-			this.pixels[i].rotateY(angle);
-		}
-	}
-
-	ptp.rotateX = function(angle){
-		for(var i = 0; i < this.pixels.length; i++){
-			this.pixels[i].rotateX(angle);
-		}
-	}
-	
-	ptp.switchRotate = function(){
-		this.isRotate = !this.isRotate;
-	}
-	
-	ptp.step = function(){
-		this.rotateY(Math.PI/180 * this.angleSpeed_y);
-		this.rotateX(Math.PI/180 * this.angleSpeed_x);
-		this.render();
-	}
+	};
 	
 	ptp.update = function(){
 		for(var i = 0; i < this.pixels.length; i++){
@@ -104,6 +77,49 @@
 			_p.size = 2.5 * Math.max(_p.getScale(), 0);
 			_p.x = _pos.x;
 			_p.y = _pos.y;
+			if(_p.tweenAnim) _p.tweenAnim.update();
+		}
+	};
+	
+	ptp.render = function(){
+		var	_pixels = this.pixels;
+		for(var i = 0; i < _pixels.length; i++) _pixels[i].render();
+	};
+	
+	ptp.rotateY = function(angle){
+		for(var i = 0; i < this.pixels.length; i++){
+			this.pixels[i].rotateY(angle);
+		}
+	};
+
+	ptp.rotateX = function(angle){
+		for(var i = 0; i < this.pixels.length; i++){
+			this.pixels[i].rotateX(angle);
+		}
+	};
+	
+	ptp.switchRotate = function(){
+		this.isRotate = !this.isRotate;
+	};
+	
+	ptp.step = function(){
+		this.rotateY(Math.PI/180 * this.angleSpeed_y);
+		this.rotateX(Math.PI/180 * this.angleSpeed_x);
+		this.render();
+	};
+	
+	ptp.createTweenAnim = function(){
+		for(var i = 0; i < this.pixels.length; i++){
+			var _p = this.pixels[i], to = {xpos : _p.xpos, ypos : _p.ypos, zpos : _p.zpos};
+			_p.xpos = ImgData.range(-this.canvasWidth/2, this.canvasWidth/2);
+			_p.ypos = ImgData.range(-this.canvasHeight/2, this.canvasHeight/2);
+			_p.zpos = ImgData.range(-10, 10); 
+			var gatherTween = new context.Tween(_p, to, 500);
+			var stayTween = new context.Tween(_p, to, 3000);
+			to = {xpos : ImgData.range(-this.canvasWidth/2, this.canvasWidth/2), ypos : ImgData.range(-this.canvasHeight/2, this.canvasHeight/2), zpos : ImgData.range(-10, 10)};
+			var explosionTween = new context.Tween(_p, to, 500);
+			_p.tweenAnim = new context.TweenAnim([gatherTween, stayTween, explosionTween]);
+			_p.tweenAnim.enter(0);
 		}
 	};
 	
@@ -131,6 +147,11 @@
 		});
 		return p;
 	};
+
+	ImgData.range = function(a, b){
+		var max = Math.max(a, b), min = Math.min(a, b);
+		return Math.random() * (max - min) + min;
+	}
 	
 	ImgData.valueBetween = function(value, a, b){
 		var max = Math.max(a, b), min = Math.min(a, b);
@@ -143,13 +164,12 @@
 		ImgData.debug = !ImgData.debug;
 	};
 	
-	var Tween = function(operator, host, to, duration, trace){
+	var Tween = function(operator, to, duration, trace){
 		this.operator = operator;
 		this.to = to;
 		this.duration = duration;
 		this.trace = trace;
 		this.end = true;
-		this.setHost(host);
 	};
 	
 	Tween.prototype = new context.$State(0);
@@ -179,19 +199,23 @@
 		if(this.end) return;
 		var dt = (+new Date) - this.timePoint;
 		
-		// TODO 根据轨迹函数应用到各属性变换
-		this.operator.xpos += (this.to.xpos - this.from.xpos) * Math.sin(Math.PI*dt/(2*this.duration));
-		this.operator.ypos += (this.to.ypos - this.from.ypos) * Math.sin(Math.PI*dt/(2*this.duration));
-		this.operator.zpos += (this.to.zpos - this.from.zpos) * Math.sin(Math.PI*dt/(2*this.duration));
-		// 暂时写死，以后实现扩展
+		if(this.to){
+			// TODO 根据轨迹函数应用到各属性变换
+			this.operator.xpos += (this.to.xpos - this.from.xpos) * Math.sin(Math.PI*dt/(2*this.duration));
+			this.operator.ypos += (this.to.ypos - this.from.ypos) * Math.sin(Math.PI*dt/(2*this.duration));
+			this.operator.zpos += (this.to.zpos - this.from.zpos) * Math.sin(Math.PI*dt/(2*this.duration));
+			// 暂时写死，以后实现扩展
+		}
 		
 		this.timePoint = (+new Date);
 	};
 	
 	var TweenAnim = (function(){
-		function TweenAnim(){};
-		TweenAnim.constructor = context.$Fsm;
-		return TweenAnim();
+		function TweenAnim(states){
+			return new context.$Fsm(states);
+		};
+		TweenAnim.prototype = context.$Fsm;
+		return TweenAnim;
 	})();
 	
 	ImgData.debug = false;
