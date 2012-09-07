@@ -71,6 +71,7 @@ UL.init = function(){
 	var at_state = new $State('at');
 	at_state.enter = function(){
 		UL.stage.addChild(UL.imgs['at']);
+		UL.imgs['at'].createTweenAnim();
 	};
 	at_state.update = function(dt){
 		UL.imgs['at'].update(dt);
@@ -84,11 +85,10 @@ UL.init = function(){
 	};
 	
 	UL.Fsm = new $Fsm([qq_state, at_state]);
-	UL.Fsm.enter(UL.Fsm.stateMap['qq']);
 	Looper.init(UL.Fsm, UL.stage);
 	Looper.start();
 	
-	var test_tweenAnim = new TweenAnim([]);
+	UL.Fsm.enter(UL.Fsm.stateMap['qq']);
 }
 
 document.body.onload = function(){UL.init();};

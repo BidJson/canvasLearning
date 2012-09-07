@@ -113,11 +113,11 @@
 			var _p = this.pixels[i], to = {xpos : _p.xpos, ypos : _p.ypos, zpos : _p.zpos};
 			_p.xpos = ImgData.range(-this.canvasWidth/2, this.canvasWidth/2);
 			_p.ypos = ImgData.range(-this.canvasHeight/2, this.canvasHeight/2);
-			_p.zpos = ImgData.range(-10, 10); 
-			var gatherTween = new context.Tween(_p, to, 500);
-			var stayTween = new context.Tween(_p, to, 3000);
+			_p.zpos = ImgData.range(-this.canvasHeight/2, this.canvasHeight/2); 
+			var gatherTween = new context.Tween(_p, to, 1000, null, true);
+			var stayTween = new context.Tween(_p, null, 3000);
 			to = {xpos : ImgData.range(-this.canvasWidth/2, this.canvasWidth/2), ypos : ImgData.range(-this.canvasHeight/2, this.canvasHeight/2), zpos : ImgData.range(-10, 10)};
-			var explosionTween = new context.Tween(_p, to, 500);
+			var explosionTween = new context.Tween(_p, to, 1000);
 			_p.tweenAnim = new context.TweenAnim([gatherTween, stayTween, explosionTween]);
 			_p.tweenAnim.enter(0);
 		}
@@ -164,12 +164,13 @@
 		ImgData.debug = !ImgData.debug;
 	};
 	
-	var Tween = function(operator, to, duration, trace){
+	var Tween = function(operator, to, duration, trace, force_to){
 		this.operator = operator;
 		this.to = to;
 		this.duration = duration;
 		this.trace = trace;
 		this.end = true;
+		this.force_to = !!force_to;
 	};
 	
 	Tween.prototype = new context.$State(0);
@@ -191,6 +192,11 @@
 	Tween.prototype.transition = function(){
 		if(this.timePoint - this.startTime >= this.duration){
 			this.end = true;
+			if(this.force_to){
+				for(var k in this.to){
+					if(this.to.hasOwnProperty(k) && this.operator.hasOwnProperty(k)) this.operator[k] = this.to[k];
+				}
+			}
 			this.host.next();
 		}
 	};
@@ -201,9 +207,12 @@
 		
 		if(this.to){
 			// TODO 根据轨迹函数应用到各属性变换
-			this.operator.xpos += (this.to.xpos - this.from.xpos) * Math.sin(Math.PI*dt/(2*this.duration));
-			this.operator.ypos += (this.to.ypos - this.from.ypos) * Math.sin(Math.PI*dt/(2*this.duration));
-			this.operator.zpos += (this.to.zpos - this.from.zpos) * Math.sin(Math.PI*dt/(2*this.duration));
+//			this.operator.xpos += (this.to.xpos - this.from.xpos) * Math.sin(Math.PI*dt/(2*this.duration));
+//			this.operator.ypos += (this.to.ypos - this.from.ypos) * Math.sin(Math.PI*dt/(2*this.duration));
+//			this.operator.zpos += (this.to.zpos - this.from.zpos) * Math.sin(Math.PI*dt/(2*this.duration));
+			this.operator.xpos += (this.to.xpos - this.from.xpos) * dt/this.duration;
+			this.operator.ypos += (this.to.ypos - this.from.ypos) * dt/this.duration;
+			this.operator.zpos += (this.to.zpos - this.from.zpos) * dt/this.duration;
 			// 暂时写死，以后实现扩展
 		}
 		
@@ -211,7 +220,7 @@
 	};
 	
 	var TweenAnim = (function(){
-		function TweenAnim(states){
+		function TweenAnim(states, callback){
 			return new context.$Fsm(states);
 		};
 		TweenAnim.prototype = context.$Fsm;

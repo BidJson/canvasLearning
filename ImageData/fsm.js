@@ -35,8 +35,8 @@
 	// 状态转换：离开当前状态，进入目标状态
 	var setState = function(host, state){
 		if(host.currentState !== Fsm.NoState) host.stateArray[host.currentState].leave();
+		if(state !== Fsm.NoState) host.stateArray[state].enter();
 		host.currentState = state;
-		if(host.currentState !== Fsm.NoState) host.stateArray[host.currentState].enter();
 	};
 	
 	Fsm.prototype.leave = function(){
