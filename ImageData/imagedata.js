@@ -104,7 +104,7 @@
 	
 	ptp.step = function(){
 		this.rotateY(Math.PI/180 * this.angleSpeed_y);
-		this.rotateX(Math.PI/180 * this.angleSpeed_x);
+		this.rotateX(Math.PI/180 * this.angleSpeed_x);55
 		this.render();
 	};
 	
@@ -115,10 +115,9 @@
 			_p.ypos = ImgData.range(-this.canvasHeight/2, this.canvasHeight/2);
 			_p.zpos = ImgData.range(-this.canvasHeight/2, this.canvasHeight/2); 
 			var gatherTween = new context.Tween(_p, to, 1000, null, true);
-			var stayTween = new context.Tween(_p, null, 3000);
 			to = {xpos : ImgData.range(-this.canvasWidth/2, this.canvasWidth/2), ypos : ImgData.range(-this.canvasHeight/2, this.canvasHeight/2), zpos : ImgData.range(-10, 10)};
 			var explosionTween = new context.Tween(_p, to, 1000);
-			_p.tweenAnim = new context.TweenAnim([gatherTween, stayTween, explosionTween]);
+			_p.tweenAnim = new context.TweenAnim([context.Tween.stillTween(_p, 1000), gatherTween, context.Tween.stillTween(_p, 3000), explosionTween]);
 			_p.tweenAnim.enter(0);
 		}
 	};
@@ -164,72 +163,7 @@
 		ImgData.debug = !ImgData.debug;
 	};
 	
-	var Tween = function(operator, to, duration, trace, force_to){
-		this.operator = operator;
-		this.to = to;
-		this.duration = duration;
-		this.trace = trace;
-		this.end = true;
-		this.force_to = !!force_to;
-	};
-	
-	Tween.prototype = new context.$State(0);
-	
-	Tween.prototype.enter = function(){
-		this.from = {};
-		for(var i in this.to){
-			if(this.to.hasOwnProperty(i) && this.operator.hasOwnProperty(i)) {
-				this.from[i] = this.operator[i];
-			}
-		}
-		this.startTime = this.timePoint = (+new Date);
-		this.end = false;		
-	};
-	
-	Tween.prototype.leave = function(){
-	};
-	
-	Tween.prototype.transition = function(){
-		if(this.timePoint - this.startTime >= this.duration){
-			this.end = true;
-			if(this.force_to){
-				for(var k in this.to){
-					if(this.to.hasOwnProperty(k) && this.operator.hasOwnProperty(k)) this.operator[k] = this.to[k];
-				}
-			}
-			this.host.next();
-		}
-	};
-	
-	Tween.prototype.update = function(dt){
-		if(this.end) return;
-		var dt = (+new Date) - this.timePoint;
-		
-		if(this.to){
-			// TODO 根据轨迹函数应用到各属性变换
-//			this.operator.xpos += (this.to.xpos - this.from.xpos) * Math.sin(Math.PI*dt/(2*this.duration));
-//			this.operator.ypos += (this.to.ypos - this.from.ypos) * Math.sin(Math.PI*dt/(2*this.duration));
-//			this.operator.zpos += (this.to.zpos - this.from.zpos) * Math.sin(Math.PI*dt/(2*this.duration));
-			this.operator.xpos += (this.to.xpos - this.from.xpos) * dt/this.duration;
-			this.operator.ypos += (this.to.ypos - this.from.ypos) * dt/this.duration;
-			this.operator.zpos += (this.to.zpos - this.from.zpos) * dt/this.duration;
-			// 暂时写死，以后实现扩展
-		}
-		
-		this.timePoint = (+new Date);
-	};
-	
-	var TweenAnim = (function(){
-		function TweenAnim(states, callback){
-			return new context.$Fsm(states);
-		};
-		TweenAnim.prototype = context.$Fsm;
-		return TweenAnim;
-	})();
-	
 	ImgData.debug = false;
 	
 	if(!context.ImgData) context.ImgData = ImgData;
-	if(!context.Tween) context.Tween = Tween;
-	if(!context.TweenAnim) context.TweenAnim = TweenAnim;
 })(this);

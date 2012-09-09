@@ -12,6 +12,7 @@ p {text-align: center; font-size:12px;color:#454545;}
 <script src="stage.js"></script>
 <script src="fsm.js"></script>
 <script src="looper.js"></script>
+<script src="tween.js"></script>
 <script src="imagedata.js"></script>
 <title>UniverseLogo</title>
 </head>
@@ -62,7 +63,7 @@ UL.init = function(){
 		this.timePoint += dt;
 	};
 	qq_state.transition = function(){
-		if(this.timePoint - this.startTime >= 5000) this.host.next(); 
+		if(this.timePoint - this.startTime >= 6000) this.host.next(); 
 	};
 	qq_state.leave = function(){
 		UL.stage.removeChild(UL.imgs['qq']);
